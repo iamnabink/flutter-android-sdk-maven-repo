@@ -1,10 +1,12 @@
 # Maven Repository
 
-This directory contains a local Maven repository with prebuilt Flutter AAR (Android Archive) artifacts. These artifacts are generated from the Flutter SDK module and can be used by Android applications without requiring the Flutter toolchain.
+This directory contains a Maven repository with prebuilt Flutter AAR (Android Archive) artifacts. These artifacts are generated from the Flutter SDK module and can be used by Android applications without requiring the Flutter toolchain.
+
+**🌐 Hosted on GitHub Pages:** [https://iamnabink.github.io/flutter-android-sdk-maven-repo](https://iamnabink.github.io/flutter-android-sdk-maven-repo)
 
 ## Overview
 
-The `maven-repo/` directory contains compiled Flutter modules packaged as AAR files, organized in standard Maven repository structure:
+The `maven-repo/` directory contains compiled Flutter modules packaged as AAR files, organized in standard Maven repository structure. This repository is hosted on GitHub Pages, making it accessible to any Android project via a simple URL.
 
 ```
 maven-repo/
@@ -33,31 +35,34 @@ Each artifact includes:
 - `.aar` file - The compiled Android Archive
 - `.pom` file - Project Object Model with dependency metadata
 
-## How It's Created
-
-The maven repository is populated by running the `move_to_maven_repo.sh` script from the project root:
-
-```bash
-./move_to_maven_repo.sh
-```
-
-This script:
-1. Locates the Flutter AAR build outputs from `flutter_sdk/build/host/outputs/repo`
-2. Moves them to the `maven-repo/` directory
-3. Organizes them in the proper Maven repository structure
-
-**Prerequisites:**
-- You must first build the Flutter AAR files:
-  ```bash
-  cd flutter_sdk
-  flutter build aar
-  ```
-
 ## Usage in Android Projects
 
 ### Step 1: Add Repository
 
-Add the local Maven repository to your `app/build.gradle` or root `build.gradle`:
+Add the Maven repository to your `app/build.gradle` or root `build.gradle`:
+
+**Option 1: Use GitHub Pages (Recommended)**
+
+```gradle
+repositories {
+    maven {
+        // GitHub Pages hosted Maven repository
+        url 'https://iamnabink.github.io/flutter-android-sdk-maven-repo'
+    }
+    
+    // Required: Flutter's Android embedding dependencies
+    maven {
+        url 'https://storage.googleapis.com/download.flutter.io'
+    }
+    
+    google()
+    mavenCentral()
+}
+```
+
+**Option 2: Use Local Repository**
+
+If you prefer to use a local copy of the repository:
 
 ```gradle
 repositories {
@@ -119,27 +124,6 @@ Add Flutter embedding metadata inside the `<application>` tag:
     android:value="2" />
 ```
 
-## Updating the Repository
-
-To update the artifacts in this repository:
-
-1. **Build new AAR files:**
-   ```bash
-   cd flutter_sdk
-   flutter clean
-   flutter pub get
-   flutter build aar
-   ```
-
-2. **Move to maven-repo:**
-   ```bash
-   cd ..
-   ./move_to_maven_repo.sh
-   ```
-
-3. **Sync your Android project:**
-   - In Android Studio: Click "Sync Now" or run `./gradlew build --refresh-dependencies`
-
 ## Repository Structure
 
 The Maven repository follows the standard Maven directory layout:
@@ -169,30 +153,44 @@ Where:
   ```
 
 ### "Could not resolve dependency"
-- Verify the path to `maven-repo` is correct in your `build.gradle`
+- If using GitHub Pages: Verify the URL is correct: `https://iamnabink.github.io/flutter-android-sdk-maven-repo`
+- If using local path: Verify the path to `maven-repo` is correct in your `build.gradle`
 - Ensure the repository contains the expected artifacts
+- Check your internet connection if using GitHub Pages
 - Try running `./gradlew build --refresh-dependencies`
 
 ### "minSdkVersion mismatch"
 - Set `minSdkVersion` to 24 or higher in your `build.gradle`
 
-### Repository is empty
-- Run `flutter build aar` first, then run `./move_to_maven_repo.sh`
-- Check that `flutter_sdk/build/host/outputs/repo` contains the build artifacts
+## Publishing to GitHub Pages
+
+This repository is configured to be served via GitHub Pages. To set up GitHub Pages for your repository:
+
+1. **Enable GitHub Pages:**
+   - Go to your repository settings on GitHub
+   - Navigate to "Pages" section
+   - Set source to the branch containing `maven-repo/` (usually `main` or `master`)
+   - Set the folder to `/maven-repo` (or `/` if `maven-repo` is in root)
+
+2. **Access the repository:**
+   - Your Maven repository will be available at: `https://<username>.github.io/<repo-name>/maven-repo`
+   - For this project: `https://iamnabink.github.io/flutter-android-sdk-maven-repo`
+
+3. **Update artifacts:**
+   - Commit and push updates to the `maven-repo/` directory
+   - GitHub Pages will automatically update
 
 ## Distribution
 
-This directory is typically:
-- **Included in version control** if you want to distribute prebuilt artifacts with your project
-- **Excluded from version control** (via `.gitignore`) if artifacts should be built locally
+This directory is:
+- **Included in version control** to enable GitHub Pages hosting
+- The artifacts are publicly accessible via the GitHub Pages URL
 
-Check the root `.gitignore` to see if `maven-repo/` is tracked or ignored.
+For local development, you can also use the local path option in your `build.gradle`.
 
 ## Related Files
 
-- `move_to_maven_repo.sh` - Script to populate this repository
 - `example_android/app/build.gradle` - Example Android project using this repository
-- `flutter_sdk/` - Source Flutter module that generates these artifacts
 
 ## See Also
 
